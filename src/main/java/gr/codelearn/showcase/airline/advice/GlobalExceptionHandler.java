@@ -6,7 +6,6 @@ import gr.codelearn.showcase.airline.component.BaseComponent;
 import gr.codelearn.showcase.airline.exception.BusinessException;
 import gr.codelearn.showcase.airline.exception.NotFoundException;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -24,15 +23,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends BaseComponent {
-	@Value("${spring.servlet.multipart.max-file-size}")
-	private String maxFileSize;
-
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse<?>> handleException(final Exception ex, final WebRequest request) {
 		logger.error("Unexpected exception occurred. Please retry the operation.", ex);
@@ -154,14 +149,6 @@ public class GlobalExceptionHandler extends BaseComponent {
 	@ExceptionHandler(MissingServletRequestPartException.class)
 	protected ResponseEntity<ApiResponse<?>> handleException(final MissingServletRequestPartException ex, final WebRequest request) {
 		var customMessage = "The submitted HTTP request is missing required parts.";
-		logger.error(customMessage, ex);
-		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.BAD_REQUEST, request, customMessage)).build(),
-									HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(MaxUploadSizeExceededException.class)
-	protected ResponseEntity<ApiResponse<?>> handleException(final MaxUploadSizeExceededException ex, final WebRequest request) {
-		var customMessage = "The submitted file exceeds the maximum upload size. Maximum upload size is " + maxFileSize;
 		logger.error(customMessage, ex);
 		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.BAD_REQUEST, request, customMessage)).build(),
 									HttpStatus.BAD_REQUEST);
