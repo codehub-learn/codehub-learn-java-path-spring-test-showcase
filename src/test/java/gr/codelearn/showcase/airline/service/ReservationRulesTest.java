@@ -23,9 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ReservationRulesTest {
-
-	private final Clock fixedClock =
-			Clock.fixed(Instant.parse("2030-01-01T00:00:00Z"), ZoneOffset.UTC);
+	private final Clock fixedClock = Clock.fixed(Instant.parse("2030-01-01T00:00:00Z"), ZoneOffset.UTC);
 
 	private Flight createFlight() {
 		Flight flight = new Flight();
