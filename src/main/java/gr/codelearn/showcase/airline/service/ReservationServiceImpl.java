@@ -41,7 +41,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 		// Check flight capacity
 		long confirmed = reservationRepo.countByFlightIdAndStatus(flightId, BookingStatus.CONFIRMED);
-		if (confirmed >= flight.getCapacity()) {
+		if (confirmed == flight.getCapacity()) {
 			throw new BusinessException("Flight capacity reached.");
 		}
 
