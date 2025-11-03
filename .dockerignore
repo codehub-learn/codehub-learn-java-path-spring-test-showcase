@@ -1,0 +1,12 @@
+.*
+*.iml
+*.iws
+**/target/
+.sonar/
+.sonarlint/
+.dockerignore
+.gitignore
+.git
+**/*.log
+docker-compose-*
+dockerfile-*

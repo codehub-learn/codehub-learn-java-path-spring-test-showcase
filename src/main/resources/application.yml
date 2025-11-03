@@ -1,0 +1,103 @@
+server:
+  port: 80
+  servlet:
+    context-path: /api
+spring:
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred #If you have many repositories, consider using deferred repository initialization:
+        enabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      auto-commit: false
+      connection-test-query: select 1
+      connection-timeout: 10000
+      idle-timeout: 60000
+      max-lifetime: 1800000
+      maximum-pool-size: 50
+      minimum-idle: 1
+      pool-name: tomConnectionPooling
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      username: ${airline.postgres.user}
+      password: ${airline.postgres.password}
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 512
+        prepStmtCacheSqlLimit: 2048
+        #serverTimezone: UTC # defaults to JVM setting either explicitly set or inherited from OS
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:postgresql://${airline.postgres.host:localhost}:${airline.postgres.port:5432}/${airline.postgres.db:airline}?reWriteBatchedInserts=true
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    open-in-view: false
+    properties:
+      hibernate:
+        batch_versioned_data: true
+        # Reduce schema metadata lookups
+        boot:
+          allow_jdbc_metadata_access: false
+          # Enables bytecode enhancement for better lazy loading performance
+          allow_enhancement_as_proxy: true
+          model:
+            jpa_compliance:
+              # Ensures JPA-compliant ID generator behavior
+              global_id_generators: true
+        check_nullability: false
+        connection:
+          # Sources
+          # https://vladmihalcea.com/spring-transaction-connection-management
+          # https://vladmihalcea.com/why-you-should-always-use-hibernate-connection-provider_disables_autocommit-for-resource-local-jpa-transactions/
+          # handling_mode: DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT
+          provider_disables_autocommit: true
+        jdbc:
+          batch_size: 100
+        format_sql: true
+        order_inserts: true
+        order_updates: true
+        query:
+          in_clause_parameter_padding: true
+          # Disable query validation at startup
+          startup_check: false
+          # Every JPQL query or Criteria query is parsed into an Abstract Syntax Tree (AST) prior to execution so that Hibernate can generate the SQL statement
+          plan_cache_max_size: 4096
+          plan_parameter_metadata_max_size: 512
+        # Skip DDL validation
+        validator:
+          apply_to_ddl: false
+        generate_statistics: false # true is NOT a production setting
+        # Reduce reflection scanning
+        archive:
+          scanner: org.hibernate.boot.archive.scan.internal.DisabledScanner
+        # Disable XML validation
+        javax:
+          cache:
+            provider: org.hibernate.cache.NoCacheProvider
+        session:
+          events:
+            log:
+              LOG_QUERIES_SLOWER_THAN_MS: 1000
+    show-sql: false
+  sql:
+    init:
+      # Mode to apply when determining if DataSource initialization should be performed using the available DDL (schema
+      # .sql) and DML (data.sql) scripts.
+      mode: never
+      platform: postgresql
+
+  application:
+    name: airline-ticket-reservation-system
+
+  threads:
+    virtual:
+      enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
+  main:
+    banner-mode: off

@@ -1,0 +1,61 @@
+# https://docs.docker.com/compose/compose-file
+services:
+  postgres-airline:
+    image: postgres:17-alpine
+    restart: on-failure
+    env_file: docker/.env.postgres-restaurant
+    volumes:
+      - ~/dbdata/postgresql/airline:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres-network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1024M
+        reservations:
+          cpus: '1'
+          memory: 256M
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    restart: on-failure
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+#      PGADMIN_DEFAULT_PASSWORD: mypgadminpass
+#    volumes:
+#      - pgadmin_data:/var/lib/pgadmin
+#    ports:
+#      - "5050:80"
+#    networks:
+#      - postgres-network
+#    depends_on:
+#      postgres-keycloak:
+#        condition: service_started
+#      postgres-tom:
+#        condition: service_started
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '2'
+#          memory: 512M
+#        reservations:
+#          cpus: '0.5'
+#          memory: 128M
+#
+#volumes:
+#  pgadmin_data:
+networks:
+  app-network:
+  postgres-network:
