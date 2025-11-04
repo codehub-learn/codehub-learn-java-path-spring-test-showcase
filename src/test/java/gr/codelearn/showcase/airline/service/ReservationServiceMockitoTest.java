@@ -10,12 +10,12 @@ import gr.codelearn.showcase.airline.exception.NotFoundException;
 import gr.codelearn.showcase.airline.repository.CustomerRepository;
 import gr.codelearn.showcase.airline.repository.FlightRepository;
 import gr.codelearn.showcase.airline.repository.ReservationRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ReservationServiceMockitoTest {
 	@Mock
 	private FlightRepository flightRepo;
@@ -52,8 +53,6 @@ class ReservationServiceMockitoTest {
 
 	@BeforeEach
 	void setup() {
-		closeable = MockitoAnnotations.openMocks(this);
-
 		flight = new Flight();
 		flight.setId(1L);
 		flight.setOrigin("ATH");
@@ -64,11 +63,6 @@ class ReservationServiceMockitoTest {
 
 		// Inject fixed clock manually since no Spring context
 		service = new ReservationServiceImpl(flightRepo, customerRepo, reservationRepo, fixedClock);
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-		closeable.close();
 	}
 
 	@Test
