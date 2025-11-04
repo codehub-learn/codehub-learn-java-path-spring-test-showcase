@@ -10,6 +10,7 @@ import gr.codelearn.showcase.airline.exception.NotFoundException;
 import gr.codelearn.showcase.airline.repository.CustomerRepository;
 import gr.codelearn.showcase.airline.repository.FlightRepository;
 import gr.codelearn.showcase.airline.repository.ReservationRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -47,9 +48,11 @@ class ReservationServiceMockitoTest {
 
 	private Flight flight;
 
+	private AutoCloseable closeable;
+
 	@BeforeEach
 	void setup() {
-		MockitoAnnotations.openMocks(this);
+		closeable = MockitoAnnotations.openMocks(this);
 
 		flight = new Flight();
 		flight.setId(1L);
@@ -61,6 +64,11 @@ class ReservationServiceMockitoTest {
 
 		// Inject fixed clock manually since no Spring context
 		service = new ReservationServiceImpl(flightRepo, customerRepo, reservationRepo, fixedClock);
+	}
+
+	@AfterEach
+	void tearDown() throws Exception {
+		closeable.close();
 	}
 
 	@Test
