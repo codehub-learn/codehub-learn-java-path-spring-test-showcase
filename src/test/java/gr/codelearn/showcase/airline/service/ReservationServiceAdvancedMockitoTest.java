@@ -167,4 +167,38 @@ class ReservationServiceAdvancedMockitoTest {
 		order.verify(reservationRepo).findById(7L);
 		order.verifyNoMoreInteractions();
 	}
+
+	@Test
+	void verifyCorrectOrderAcrossMultipleRepositories() {
+		// Given
+		Flight flight = new Flight();
+		flight.setId(1L);
+		flight.setOrigin("ATH");
+		flight.setDestination("LHR");
+		flight.setCapacity(10);
+		flight.setDepartureAt(ZonedDateTime.now(clock).plusDays(1));
+		flight.setArrivalAt(ZonedDateTime.now(clock).plusDays(1).plusHours(3));
+
+		Customer customer = new Customer(1L, "Order User", "order@demo.com");
+
+		when(flightRepo.findById(1L)).thenReturn(Optional.of(flight));
+		when(customerRepo.findByEmail("order@demo.com")).thenReturn(Optional.of(customer));
+		when(reservationRepo.findByFlightIdAndSeatNumber(1L, "2C")).thenReturn(Optional.empty());
+		when(reservationRepo.countByFlightIdAndStatus(1L, BookingStatus.CONFIRMED)).thenReturn(0L);
+		when(reservationRepo.save(any(Reservation.class))).thenAnswer(inv -> inv.getArgument(0));
+
+		// When
+		service.reserve(1L, "order@demo.com", SeatClass.ECONOMY, "2C");
+
+		// Then: verify sequence across multiple mocks
+		InOrder order = inOrder(flightRepo, customerRepo, reservationRepo);
+
+		order.verify(flightRepo).findById(1L);
+		order.verify(customerRepo).findByEmail("order@demo.com");
+		order.verify(reservationRepo).findByFlightIdAndSeatNumber(1L, "2C");
+		order.verify(reservationRepo).countByFlightIdAndStatus(1L, BookingStatus.CONFIRMED);
+		order.verify(reservationRepo).save(any(Reservation.class));
+		order.verifyNoMoreInteractions();
+	}
+
 }
