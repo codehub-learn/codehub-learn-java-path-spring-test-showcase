@@ -5,6 +5,7 @@ import gr.codelearn.showcase.airline.domain.Customer;
 import gr.codelearn.showcase.airline.domain.Flight;
 import gr.codelearn.showcase.airline.domain.Reservation;
 import gr.codelearn.showcase.airline.domain.SeatClass;
+import gr.codelearn.showcase.airline.exception.NotFoundException;
 import gr.codelearn.showcase.airline.repository.CustomerRepository;
 import gr.codelearn.showcase.airline.repository.FlightRepository;
 import gr.codelearn.showcase.airline.repository.ReservationRepository;
@@ -25,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,6 +110,20 @@ class ReservationServiceAdvancedMockitoTest {
 		verify(reservationRepo).countByFlightIdAndStatus(1L, BookingStatus.CONFIRMED);
 		verify(reservationRepo).save(any(Reservation.class));
 		verifyNoMoreInteractions(flightRepo, customerRepo, reservationRepo);
+	}
+
+	@Test
+	void verifyNoInteractionsWhenFlightNotFound() {
+		// Given: the flight repository returns empty
+		when(flightRepo.findById(999L)).thenReturn(Optional.empty());
+
+		// When & Then: reservation attempt throws NotFoundException
+		assertThrows(NotFoundException.class, () ->
+				service.reserve(999L, "ghost@flight.com", SeatClass.ECONOMY, "9Z"));
+
+		// Verify: flightRepo was queried once, but others were never touched
+		verify(flightRepo).findById(999L);
+		verifyNoInteractions(customerRepo, reservationRepo);
 	}
 
 	@Test
