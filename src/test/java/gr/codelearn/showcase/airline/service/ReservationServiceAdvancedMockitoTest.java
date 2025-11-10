@@ -194,9 +194,9 @@ class ReservationServiceAdvancedMockitoTest {
 		InOrder order = inOrder(flightRepo, customerRepo, reservationRepo);
 
 		order.verify(flightRepo).findById(1L);
-		order.verify(customerRepo).findByEmail("order@demo.com");
 		order.verify(reservationRepo).findByFlightIdAndSeatNumber(1L, "2C");
 		order.verify(reservationRepo).countByFlightIdAndStatus(1L, BookingStatus.CONFIRMED);
+		order.verify(customerRepo).findByEmail("order@demo.com");
 		order.verify(reservationRepo).save(any(Reservation.class));
 		order.verifyNoMoreInteractions();
 	}
