@@ -6,7 +6,10 @@ import gr.codelearn.showcase.airline.domain.BookingStatus;
 import gr.codelearn.showcase.airline.domain.Reservation;
 import gr.codelearn.showcase.airline.domain.SeatClass;
 import gr.codelearn.showcase.airline.service.ReservationService;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ReservationController.class)
 @Import(ReservationControllerWebMvcTest.MockBeans.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ReservationControllerWebMvcTest {
 
 	@Autowired
@@ -49,6 +53,7 @@ class ReservationControllerWebMvcTest {
 		}
 	}
 
+	@Order(1)
 	@Test
 	void reserveReturns200WithApiResponse() throws Exception {
 		Reservation domain = new Reservation();
@@ -87,6 +92,7 @@ class ReservationControllerWebMvcTest {
 			   .andExpect(jsonPath("$.data.status").value("PENDING"));
 	}
 
+	@Order(2)
 	@Test
 	void confirmReturns200WithUpdatedResource() throws Exception {
 		Reservation domain = new Reservation();
@@ -110,6 +116,7 @@ class ReservationControllerWebMvcTest {
 			   .andExpect(jsonPath("$.data.status").value("CONFIRMED"));
 	}
 
+	@Order(4)
 	@Test
 	void cancelReturns204() throws Exception {
 		doNothing().when(reservationService).cancel(10L);
@@ -118,6 +125,7 @@ class ReservationControllerWebMvcTest {
 			   .andExpect(status().isNoContent());
 	}
 
+	@Order(3)
 	@Test
 	void getReturns200WithResource() throws Exception {
 		Reservation domain = new Reservation();
@@ -142,6 +150,7 @@ class ReservationControllerWebMvcTest {
 			   .andExpect(jsonPath("$.data.seatNumber").value("4C"));
 	}
 
+	@Order(5)
 	@Test
 	void getReturns404WhenMissing() throws Exception {
 		when(reservationService.get(999L)).thenReturn(java.util.Optional.empty());
