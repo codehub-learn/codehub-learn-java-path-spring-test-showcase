@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
 @RestController
@@ -39,11 +38,12 @@ public class ReservationController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<ReservationResource>> get(@PathVariable Long id) {
-		return ResponseEntity.ok(ApiResponse.<ReservationResource>builder()
-											.data(service.get(id)
-														 .map(mapper::toResource)
-														 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)))
-											.build());
+		return ResponseEntity.of(
+				service.get(id)
+					   .map(mapper::toResource)
+					   .map(resource -> ApiResponse.<ReservationResource>builder()
+												   .data(resource)
+												   .build()));
 	}
 
 	@PostMapping(value = "/{id}", headers = "action=confirm")
