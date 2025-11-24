@@ -3,6 +3,7 @@ package gr.codelearn.showcase.airline.api.controller;
 import gr.codelearn.showcase.airline.api.resource.mapper.ReservationMapper;
 import gr.codelearn.showcase.airline.domain.Reservation;
 import gr.codelearn.showcase.airline.domain.SeatClass;
+import gr.codelearn.showcase.airline.exception.BusinessException;
 import gr.codelearn.showcase.airline.service.ReservationService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -97,8 +98,8 @@ class ReservationControllerEdgeCaseWebMvcTest {
 
 	@Test
 	void reserveFailsOnBusinessError() throws Exception {
-		when(reservationService.reserve(1L, "a@b.com", SeatClass.ECONOMY, "1A")).thenThrow(new IllegalStateException("Seat already " +
-																													 "taken"));
+		when(reservationService.reserve(1L, "a@b.com", SeatClass.ECONOMY, "1A")).thenThrow(new BusinessException("Seat already " +
+																												 "taken"));
 
 		mockMvc.perform(post("/api/reservations")
 								.contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +111,7 @@ class ReservationControllerEdgeCaseWebMvcTest {
 										       "seatNumber": "1A"
 										     }
 										 """))
-			   .andExpect(status().isConflict());
+			   .andExpect(status().isNotAcceptable());
 	}
 
 	@Test

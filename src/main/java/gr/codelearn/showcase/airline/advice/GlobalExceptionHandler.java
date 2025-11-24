@@ -54,8 +54,8 @@ public class GlobalExceptionHandler extends BaseComponent {
 	@ExceptionHandler(BusinessException.class)
 	public ResponseEntity<ApiResponse<?>> handleException(final BusinessException ex, final WebRequest request) {
 		logger.error("Unable to complete the selected action.", ex);
-		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.FORBIDDEN, request)).build(),
-									HttpStatus.FORBIDDEN);
+		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.NOT_ACCEPTABLE, request)).build(),
+									HttpStatus.NOT_ACCEPTABLE);
 	}
 
 	@ExceptionHandler(ResourceAccessException.class)
