@@ -1,4 +1,4 @@
-package gr.codelearn.showcase.airline.advice;
+package gr.codelearn.showcase.airline.api.advice;
 
 import gr.codelearn.showcase.airline.api.transfer.ApiError;
 import gr.codelearn.showcase.airline.api.transfer.ApiResponse;
