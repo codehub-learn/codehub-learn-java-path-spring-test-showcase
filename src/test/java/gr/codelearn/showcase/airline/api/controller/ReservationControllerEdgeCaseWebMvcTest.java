@@ -4,6 +4,7 @@ import gr.codelearn.showcase.airline.api.resource.mapper.ReservationMapper;
 import gr.codelearn.showcase.airline.domain.Reservation;
 import gr.codelearn.showcase.airline.domain.SeatClass;
 import gr.codelearn.showcase.airline.exception.BusinessException;
+import gr.codelearn.showcase.airline.exception.NotFoundException;
 import gr.codelearn.showcase.airline.service.ReservationService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -128,10 +129,10 @@ class ReservationControllerEdgeCaseWebMvcTest {
 
 	@Test
 	void confirmMissingReservation() throws Exception {
-		when(reservationService.confirm(100L)).thenThrow(new RuntimeException("not found"));
+		when(reservationService.confirm(100L)).thenThrow(new NotFoundException("not found"));
 
 		mockMvc.perform(post("/api/reservations/100").header("action", "confirm"))
-			   .andExpect(status().isBadRequest());
+			   .andExpect(status().isNotFound());
 	}
 
 	@Test
