@@ -31,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(ReservationController.class)
 @Import(ReservationControllerAdditionalWebMvcTest.MockBeans.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-		/* Typical additional scenarios */
 class ReservationControllerAdditionalWebMvcTest {
 	@Autowired
 	private MockMvc mockMvc;
