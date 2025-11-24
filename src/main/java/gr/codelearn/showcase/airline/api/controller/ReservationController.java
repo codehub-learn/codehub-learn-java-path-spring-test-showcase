@@ -38,6 +38,10 @@ public class ReservationController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<ReservationResource>> get(@PathVariable Long id) {
+		if (id < 1) {
+			throw new IllegalArgumentException("Identifier must be greater than zero, rejected %d".formatted(id));
+		}
+
 		return ResponseEntity.of(
 				service.get(id)
 					   .map(mapper::toResource)
@@ -48,6 +52,10 @@ public class ReservationController {
 
 	@PostMapping(value = "/{id}", headers = "action=confirm")
 	public ResponseEntity<ApiResponse<ReservationResource>> confirm(@PathVariable Long id) {
+		if (id < 1) {
+			throw new IllegalArgumentException("Identifier must be greater than zero, rejected %d".formatted(id));
+		}
+
 		return ResponseEntity.ok(ApiResponse.<ReservationResource>builder()
 											.data(mapper.toResource(service.confirm(id)))
 											.build());
@@ -56,6 +64,10 @@ public class ReservationController {
 	@PostMapping(value = "/{id}", headers = "action=cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancel(@PathVariable Long id) {
+		if (id < 1) {
+			throw new IllegalArgumentException("Identifier must be greater than zero, rejected %d".formatted(id));
+		}
+
 		service.cancel(id);
 	}
 }

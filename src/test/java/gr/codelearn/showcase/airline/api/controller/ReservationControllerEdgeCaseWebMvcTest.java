@@ -92,7 +92,7 @@ class ReservationControllerEdgeCaseWebMvcTest {
 	void getFailsOnNegativeId() throws Exception {
 		// normally you would add @Validated + @Min(1) to controller parameter
 		mockMvc.perform(get("/api/reservations/-1"))
-			   .andExpect(status().isBadRequest());
+			   .andExpect(status().isNotAcceptable());
 	}
 
 	@Test

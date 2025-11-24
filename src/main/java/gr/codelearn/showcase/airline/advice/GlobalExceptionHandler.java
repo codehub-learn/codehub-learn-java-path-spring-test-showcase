@@ -44,6 +44,13 @@ public class GlobalExceptionHandler extends BaseComponent {
 									HttpStatus.NOT_FOUND);
 	}
 
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ApiResponse<?>> handleException(final IllegalArgumentException ex, final WebRequest request) {
+		logger.error("Identifier cannot be a negative number.", ex);
+		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.NOT_ACCEPTABLE, request)).build(),
+									HttpStatus.NOT_ACCEPTABLE);
+	}
+
 	@ExceptionHandler(BusinessException.class)
 	public ResponseEntity<ApiResponse<?>> handleException(final BusinessException ex, final WebRequest request) {
 		logger.error("Unable to complete the selected action.", ex);
