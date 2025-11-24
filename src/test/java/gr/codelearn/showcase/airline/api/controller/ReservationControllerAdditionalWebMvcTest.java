@@ -5,8 +5,12 @@ import gr.codelearn.showcase.airline.api.resource.response.ReservationResource;
 import gr.codelearn.showcase.airline.domain.BookingStatus;
 import gr.codelearn.showcase.airline.domain.Reservation;
 import gr.codelearn.showcase.airline.domain.SeatClass;
+import gr.codelearn.showcase.airline.exception.NotFoundException;
 import gr.codelearn.showcase.airline.service.ReservationService;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ReservationController.class)
 @Import(ReservationControllerAdditionalWebMvcTest.MockBeans.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+		/* Typical additional scenarios */
 class ReservationControllerAdditionalWebMvcTest {
 	@Autowired
 	private MockMvc mockMvc;
@@ -49,44 +55,62 @@ class ReservationControllerAdditionalWebMvcTest {
 		}
 	}
 
+	@Order(1)
 	@Test
 	void reserveReturns400OnInvalidPayload() throws Exception {
-		mockMvc.perform(post("/api/reservations").contentType(MediaType.APPLICATION_JSON).content("""
-																								  {
-																								      "flightId": null,
-																								      "customerEmail": "",
-																								      "seatClass": "INVALID",
-																								      "seatNumber": ""
-																								  }
-																								  """)).andExpect(status().isBadRequest());
+		// intentionally invalid JSON (nulls, empty strings, invalid enum)
+		mockMvc.perform(post("/api/reservations")
+								.contentType(MediaType.APPLICATION_JSON)
+								.content("""
+										 {
+										   "flightId": null,
+										   "customerEmail": "",
+										   "seatClass": "INVALID",
+										   "seatNumber": ""
+										 }
+										 """))
+			   .andExpect(status().isBadRequest());
 	}
 
+	@Order(2)
 	@Test
 	void confirmReturns404IfNotFound() throws Exception {
-		when(reservationService.confirm(99L)).thenThrow(new IllegalArgumentException("not found"));
+		when(reservationService.confirm(99L)).thenThrow(new NotFoundException("not found"));
 
-		mockMvc.perform(post("/api/reservations/99").header("action", "confirm")).andExpect(
-				status().isBadRequest()); // Or .isNotFound() if your controller maps the exception differently
+		mockMvc.perform(post("/api/reservations/99").header("action", "confirm"))
+			   .andExpect(status().isNotFound());
 	}
 
+	@Order(3)
 	@Test
 	void getReturnsCorrectJsonShape() throws Exception {
 		Reservation domain = new Reservation();
 		domain.setId(123L);
 
-		ReservationResource mapped = new ReservationResource(123L, 9L, "test@example.com", "1A", SeatClass.BUSINESS,
-															 BookingStatus.CONFIRMED);
+		ReservationResource mapped = new ReservationResource(
+				123L,
+				9L,
+				"test@example.com",
+				"1A",
+				SeatClass.BUSINESS,
+				BookingStatus.CONFIRMED
+		);
 
 		when(reservationService.get(123L)).thenReturn(Optional.of(domain));
 		when(reservationMapper.toResource(domain)).thenReturn(mapped);
 
-		mockMvc.perform(get("/api/reservations/123")).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(123)).andExpect(
-				jsonPath("$.data.flightId").value(9)).andExpect(jsonPath("$.data.customerEmail").value("test@example.com")).andExpect(
-				jsonPath("$.data.status").value("CONFIRMED"));
+		mockMvc.perform(get("/api/reservations/123"))
+			   .andExpect(status().isOk())
+			   .andExpect(jsonPath("$.data.id").value(123))
+			   .andExpect(jsonPath("$.data.flightId").value(9))
+			   .andExpect(jsonPath("$.data.customerEmail").value("test@example.com"))
+			   .andExpect(jsonPath("$.data.status").value("CONFIRMED"));
 	}
 
+	@Order(4)
 	@Test
 	void unsupportedActionReturns400() throws Exception {
-		mockMvc.perform(post("/api/reservations/10").header("action", "INVALID")).andExpect(status().isBadRequest());
+		mockMvc.perform(post("/api/reservations/10").header("action", "non-existent"))
+			   .andExpect(status().isNotFound());
 	}
 }
