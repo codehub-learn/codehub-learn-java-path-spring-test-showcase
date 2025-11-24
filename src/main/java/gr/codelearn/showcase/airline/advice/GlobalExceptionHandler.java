@@ -119,8 +119,8 @@ public class GlobalExceptionHandler extends BaseComponent {
 	@ExceptionHandler(HttpMediaTypeException.class)
 	protected ResponseEntity<ApiResponse<?>> handleException(final HttpMediaTypeException ex, final WebRequest request) {
 		logger.error("Content type is not supported.", ex);
-		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.BAD_REQUEST, request)).build(),
-									HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.UNSUPPORTED_MEDIA_TYPE, request)).build(),
+									HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	@ExceptionHandler(UnsatisfiedServletRequestParameterException.class)
