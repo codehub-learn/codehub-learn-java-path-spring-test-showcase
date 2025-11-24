@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    # These "dummy" URLs are ignored because Testcontainers overrides them before Hibernate starts.
+    url: jdbc:postgresql://localhost:5432/ignored
+    username: test
+    password: test
+    hikari:
+      username: postgres
+      password: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
