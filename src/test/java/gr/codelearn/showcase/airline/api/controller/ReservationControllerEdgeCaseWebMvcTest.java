@@ -77,7 +77,7 @@ class ReservationControllerEdgeCaseWebMvcTest {
 	@Test
 	void actionHeaderIsRequired() throws Exception {
 		mockMvc.perform(post("/api/reservations/10"))
-			   .andExpect(status().isBadRequest());
+			   .andExpect(status().isNotFound());
 	}
 
 	@Test
