@@ -40,8 +40,8 @@ public class GlobalExceptionHandler extends BaseComponent {
 	@ExceptionHandler(NotFoundException.class)
 	public ResponseEntity<ApiResponse<?>> handleException(final NotFoundException ex, final WebRequest request) {
 		logger.error("Unable to find the selected resource.", ex);
-		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.FORBIDDEN, request)).build(),
-									HttpStatus.FORBIDDEN);
+		return new ResponseEntity<>(ApiResponse.builder().apiError(getApiError(ex, HttpStatus.NOT_FOUND, request)).build(),
+									HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(BusinessException.class)
