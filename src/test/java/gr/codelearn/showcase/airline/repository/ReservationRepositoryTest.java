@@ -15,7 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.time.ZonedDateTime;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -96,4 +97,94 @@ class ReservationRepositoryTest {
 		// Assert
 		assertThat(count).isEqualTo(1);
 	}
+
+	@Test
+	void saveFailsWithoutCustomerOrFlight() {
+		// Arrange
+		Reservation r = new Reservation();
+		r.setSeatClass(SeatClass.ECONOMY);
+		r.setSeatNumber("1A");
+		r.setStatus(BookingStatus.PENDING);
+
+		// Act + Assert
+		assertThrows(Exception.class, () -> reservationRepository.saveAndFlush(r));
+	}
+
+	@Test
+	void deletingReservationDoesNotDeleteRelatedEntities() {
+		// Arrange
+		Flight flight = new Flight();
+		flight.setOrigin("ATH");
+		flight.setDestination("LAX");
+		flight.setCapacity(200);
+		flight.setDepartureAt(ZonedDateTime.now().plusDays(2));
+		flight.setArrivalAt(ZonedDateTime.now().plusDays(2).plusHours(12));
+		flightRepository.save(flight);
+
+		Customer customer = new Customer();
+		customer.setFullName("Remain Person");
+		customer.setEmail("remain@test.com");
+		customerRepository.save(customer);
+
+		Reservation r = new Reservation();
+		r.setFlight(flight);
+		r.setCustomer(customer);
+		r.setSeatClass(SeatClass.BUSINESS);
+		r.setSeatNumber("3C");
+		r.setStatus(BookingStatus.CONFIRMED);
+		reservationRepository.save(r);
+
+		// Act
+		reservationRepository.delete(r);
+
+		// Assert
+		assertThat(flightRepository.findById(flight.getId())).isPresent();
+		assertThat(customerRepository.findById(customer.getId())).isPresent();
+	}
+
+	@Test
+	void countByFlightIdAndStatusReturnsZeroWhenNoMatch() {
+		// Arrange
+
+		// Act
+		long count = reservationRepository.countByFlightIdAndStatus(999L, BookingStatus.CONFIRMED);
+
+		// Assert
+		assertThat(count).isZero();
+	}
+
+	@Test
+	void updateReservationStatus() {
+		// Arrange
+		Flight flight = new Flight();
+		flight.setOrigin("ATH");
+		flight.setDestination("DXB");
+		flight.setCapacity(150);
+		flight.setDepartureAt(ZonedDateTime.now().plusDays(1));
+		flight.setArrivalAt(ZonedDateTime.now().plusDays(1).plusHours(4));
+		flightRepository.save(flight);
+
+		Customer customer = new Customer();
+		customer.setFullName("Update Tester");
+		customer.setEmail("update@test.com");
+		customerRepository.save(customer);
+
+		Reservation r = new Reservation();
+		r.setFlight(flight);
+		r.setCustomer(customer);
+		r.setSeatClass(SeatClass.ECONOMY);
+		r.setSeatNumber("5D");
+		r.setStatus(BookingStatus.PENDING);
+		reservationRepository.save(r);
+
+		// Act
+		r.setStatus(BookingStatus.CONFIRMED);
+		reservationRepository.save(r);
+
+		Reservation updated = reservationRepository.findById(r.getId()).orElseThrow();
+
+		// Assert
+		assertThat(updated.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
+	}
+
 }
