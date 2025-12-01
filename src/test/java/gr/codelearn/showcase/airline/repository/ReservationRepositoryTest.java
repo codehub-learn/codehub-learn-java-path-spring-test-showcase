@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = PostgresContainerConfig.class)
+@Import(TransactionTestService.class)
 class ReservationRepositoryTest {
 	@Autowired
 	private ReservationRepository reservationRepository;
@@ -31,6 +32,8 @@ class ReservationRepositoryTest {
 	private FlightRepository flightRepository;
 	@Autowired
 	private CustomerRepository customerRepository;
+	@Autowired
+	private TransactionTestService txService;
 
 	@Test
 	void saveReservationAndLoadGraph() {
@@ -205,25 +208,19 @@ class ReservationRepositoryTest {
 		c.setEmail("rollback@test.com");
 		customerRepository.save(c);
 
+		Reservation r = new Reservation();
+		r.setFlight(f);
+		r.setCustomer(c);
+		r.setSeatClass(SeatClass.BUSINESS);
+		r.setSeatNumber("10A");
+		r.setStatus(BookingStatus.PENDING);
+
 		// Act
-		try {
-			Reservation r = new Reservation();
-			r.setFlight(f);
-			r.setCustomer(c);
-			r.setSeatClass(SeatClass.BUSINESS);
-			r.setSeatNumber("bad-seat"); // will fail if format constraint exists later
-			r.setStatus(BookingStatus.PENDING);
-
-			reservationRepository.saveAndFlush(r);
-
-			throw new RuntimeException("force rollback");
-		} catch (Exception ignore) {
-			// force rollback via DataJpaTest default transactional behavior
-		}
+		assertThrows(RuntimeException.class, () -> txService.createReservationAndFail(r));
 
 		// Assert
 		long count = reservationRepository.count();
-		assertThat(count).isEqualTo(0);
+		assertThat(count).isZero();
 	}
 
 	@Test
@@ -285,7 +282,10 @@ class ReservationRepositoryTest {
 		reservationRepository.save(r);
 
 		// Act + Assert
-		assertThrows(Exception.class, () -> customerRepository.deleteById(c.getId()));
+		assertThrows(Exception.class, () -> {
+			customerRepository.deleteById(c.getId());
+			customerRepository.flush();
+		});
 	}
 
 }

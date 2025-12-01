@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,11 +36,11 @@ public class Reservation {
 	private Long id;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "flight_id")
+	@JoinColumn(name = "flight_id", nullable = false, foreignKey = @ForeignKey(name = "fk_reservation_flight"))
 	private Flight flight;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "customer_id")
+	@JoinColumn(name = "customer_id", nullable = false, foreignKey = @ForeignKey(name = "fk_reservation_customer"))
 	private Customer customer;
 
 	@Enumerated(EnumType.STRING)
