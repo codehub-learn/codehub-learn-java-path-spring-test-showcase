@@ -6,16 +6,18 @@ import gr.codelearn.showcase.airline.domain.Customer;
 import gr.codelearn.showcase.airline.domain.Flight;
 import gr.codelearn.showcase.airline.domain.Reservation;
 import gr.codelearn.showcase.airline.domain.SeatClass;
+import gr.codelearn.showcase.airline.testutil.TransactionTestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.ZonedDateTime;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
@@ -185,6 +187,105 @@ class ReservationRepositoryTest {
 
 		// Assert
 		assertThat(updated.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
+	}
+
+	@Test
+	void transactionRollsBackOnException() {
+		// Arrange
+		Flight f = new Flight();
+		f.setOrigin("ATH");
+		f.setDestination("SIN");
+		f.setCapacity(100);
+		f.setDepartureAt(ZonedDateTime.now().plusDays(3));
+		f.setArrivalAt(ZonedDateTime.now().plusDays(3).plusHours(12));
+		flightRepository.save(f);
+
+		Customer c = new Customer();
+		c.setFullName("Rollback Tester");
+		c.setEmail("rollback@test.com");
+		customerRepository.save(c);
+
+		// Act
+		try {
+			Reservation r = new Reservation();
+			r.setFlight(f);
+			r.setCustomer(c);
+			r.setSeatClass(SeatClass.BUSINESS);
+			r.setSeatNumber("bad-seat"); // will fail if format constraint exists later
+			r.setStatus(BookingStatus.PENDING);
+
+			reservationRepository.saveAndFlush(r);
+
+			throw new RuntimeException("force rollback");
+		} catch (Exception ignore) {
+			// force rollback via DataJpaTest default transactional behavior
+		}
+
+		// Assert
+		long count = reservationRepository.count();
+		assertThat(count).isEqualTo(0);
+	}
+
+	@Test
+	void duplicateSeatNumberOnSameFlightFails() {
+		// Arrange
+		Flight f = new Flight();
+		f.setOrigin("ATH");
+		f.setDestination("FRA");
+		f.setCapacity(200);
+		f.setDepartureAt(ZonedDateTime.now());
+		f.setArrivalAt(ZonedDateTime.now().plusHours(3));
+		flightRepository.save(f);
+
+		Customer c = new Customer();
+		c.setFullName("Unique Tester");
+		c.setEmail("unique@test.com");
+		customerRepository.save(c);
+
+		Reservation r1 = new Reservation();
+		r1.setFlight(f);
+		r1.setCustomer(c);
+		r1.setSeatClass(SeatClass.ECONOMY);
+		r1.setSeatNumber("10A");
+		r1.setStatus(BookingStatus.CONFIRMED);
+		reservationRepository.save(r1);
+
+		Reservation r2 = new Reservation();
+		r2.setFlight(f);
+		r2.setCustomer(c);
+		r2.setSeatClass(SeatClass.ECONOMY);
+		r2.setSeatNumber("10A");
+
+		// Act + Assert
+		assertThrows(Exception.class, () -> reservationRepository.saveAndFlush(r2));
+	}
+
+	@Test
+	void cannotDeleteCustomerIfReservationExists() {
+		// Arrange
+		Flight f = new Flight();
+		f.setOrigin("ATH");
+		f.setDestination("VIE");
+		f.setCapacity(150);
+		f.setDepartureAt(ZonedDateTime.now());
+		f.setArrivalAt(ZonedDateTime.now().plusHours(2));
+		flightRepository.save(f);
+
+		Customer c = new Customer();
+		c.setFullName("Ref Integrity 2");
+		c.setEmail("ref2@test.com");
+		customerRepository.save(c);
+
+		Reservation r = new Reservation();
+		r.setFlight(f);
+		r.setCustomer(c);
+		r.setSeatClass(SeatClass.BUSINESS);
+		r.setSeatNumber("6A");
+		r.setStatus(BookingStatus.CONFIRMED);
+		reservationRepository.save(r);
+
+		// Act + Assert
+		assertThrows(Exception.class, () -> customerRepository.deleteById(c.getId()));
 	}
 
 }
