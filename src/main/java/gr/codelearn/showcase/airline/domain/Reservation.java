@@ -14,7 +14,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,9 +23,8 @@ import java.time.ZonedDateTime;
 
 @Getter
 @Setter
-@ToString(callSuper = true)
+@ToString
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "reservations",
 	   uniqueConstraints = @UniqueConstraint(name = "uk_flight_seat", columnNames = {"flight_id", "seat_number"}))
@@ -59,4 +57,14 @@ public class Reservation {
 
 	@Column(name = "created_at", nullable = false)
 	private ZonedDateTime createdAt = ZonedDateTime.now();
+
+	public Reservation(final Long id, final Flight flight, final Customer customer, final SeatClass seatClass, final String seatNumber,
+					   final BookingStatus status) {
+		this.id = id;
+		this.flight = flight;
+		this.customer = customer;
+		this.seatClass = seatClass;
+		this.seatNumber = seatNumber;
+		this.status = status;
+	}
 }
