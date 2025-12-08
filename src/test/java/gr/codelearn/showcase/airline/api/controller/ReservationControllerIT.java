@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = PostgresContainerConfig.class)
 @ActiveProfiles("test")
-class ReservationControllerIntegrationTest {
+class ReservationControllerIT {
 	@Autowired
 	private MockMvc mockMvc;
 	@Autowired

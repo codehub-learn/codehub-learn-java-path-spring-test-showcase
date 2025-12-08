@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ActiveProfiles("test")
 @ContextConfiguration(initializers = PostgresContainerConfig.class)
-class ReservationServiceIntegrationTest {
+class ReservationServiceIT {
 	@Autowired
 	private ReservationService reservationService;
 
