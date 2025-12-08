@@ -331,6 +331,18 @@
 						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<excludes>
+						<exclude>**/api/advice/**</exclude>
+						<exclude>**/api/resource/**</exclude>
+						<exclude>**/api/transfer/**</exclude>
+						<exclude>**/component/**</exclude>
+						<exclude>**/config/**</exclude>
+						<exclude>**/domain/**</exclude>
+						<exclude>**/exception/**</exclude>
+					</excludes>
+				</configuration>
+
 			</plugin>
 		</plugins>
 
