@@ -3,7 +3,7 @@ services:
   postgres-airline:
     image: postgres:17-alpine
     restart: on-failure
-    env_file: docker/.env.postgres-restaurant
+    env_file: docker/.env.postgres-airline
     volumes:
       - ~/dbdata/postgresql/airline:/var/lib/postgresql/data
     ports:
