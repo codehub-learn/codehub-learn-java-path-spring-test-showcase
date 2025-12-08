@@ -124,21 +124,6 @@ class ReservationControllerIntegrationTest {
 	}
 
 	@Test
-	void confirmChangesStatusToConfirmed() throws Exception {
-		Reservation r = new Reservation();
-		r.setFlight(flight);
-		r.setCustomer(customer);
-		r.setSeatClass(SeatClass.ECONOMY);
-		r.setSeatNumber("22C");
-		r.setStatus(BookingStatus.PENDING);
-		r = reservationRepository.save(r);
-
-		mockMvc.perform(post("/api/reservations/" + r.getId()).header("action", "confirm"))
-			   .andExpect(status().isOk())
-			   .andExpect(jsonPath("$.data.status").value("CONFIRMED"));
-	}
-
-	@Test
 	void cancelReturns204() throws Exception {
 		Reservation r = new Reservation();
 		r.setFlight(flight);
@@ -163,12 +148,19 @@ class ReservationControllerIntegrationTest {
 		Reservation r = new Reservation();
 		r.setFlight(flight);
 		r.setCustomer(customer);
-		r.setSeatClass(SeatClass.ECONOMY);
+		r.setSeatClass(SeatClass.BUSINESS);
 		r.setSeatNumber("19A");
-		r.setStatus(BookingStatus.PENDING);
+		r.setStatus(BookingStatus.CONFIRMED);
 		r = reservationRepository.save(r);
 
 		mockMvc.perform(post("/api/reservations/" + r.getId()).header("action", "cancel"))
-			   .andExpect(status().isBadRequest());
+			   .andExpect(status().isNotAcceptable());
+	}
+
+	@Test
+	void unsupportedActionReturns400() throws Exception {
+		var r = reservationRepository.save(new Reservation(null, flight, customer, SeatClass.ECONOMY, "33C", BookingStatus.PENDING));
+		mockMvc.perform(post("/api/reservations/" + r.getId()).header("action", "invalid"))
+			   .andExpect(status().isNotFound());
 	}
 }

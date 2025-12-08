@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", config = IgnoreUnmappedMapperConfig.class)
 public interface ReservationMapper {
 	@Mapping(target = "flightId", source = "flight.id")
-	@Mapping(target = "customerEmail", source = "customer.email")
+	@Mapping(target = "customerEmail", expression = "java(reservation.getCustomer() != null ? reservation.getCustomer().getEmail() : " +
+													"null)")
 	ReservationResource toResource(Reservation reservation);
 }

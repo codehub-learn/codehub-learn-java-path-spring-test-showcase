@@ -396,6 +396,11 @@ public class FakeRepositories {
 		}
 
 		@Override
+		public Optional<Reservation> getFullReservation(final Long id) {
+			return Optional.ofNullable(reservations.get(id));
+		}
+
+		@Override
 		public <S extends Reservation> S save(S entity) {
 			if (entity.getId() == null) {
 				entity.setId(idGen.getAndIncrement());

@@ -21,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class ReservationServiceImpl implements ReservationService {
+	// TODO extract service layer for flight and customer
 	private final FlightRepository flightRepo;
 	private final CustomerRepository customerRepo;
 	private final ReservationRepository reservationRepo;
@@ -78,18 +79,26 @@ public class ReservationServiceImpl implements ReservationService {
 		}
 
 		r.setStatus(BookingStatus.CONFIRMED);
+		//		reservationRepo.save(r);
+		//
+		//		return reservationRepo.getFullReservation(r.getId())
+		//							  .orElseThrow(() -> new NotFoundException("Reservation not found."));
 		return r;
 	}
 
 	@Override
 	public void cancel(Long id) {
 		Reservation r = reservationRepo.findById(id).orElseThrow(() -> new NotFoundException("Reservation not found."));
+		if (r.getStatus() == BookingStatus.CONFIRMED && r.getCreatedAt().isBefore(ZonedDateTime.now(clock))) {
+			throw new BusinessException("Cannot cancel a departed reservation.");
+		}
 
 		r.setStatus(BookingStatus.CANCELLED);
 	}
 
+	@Transactional(readOnly = true)
 	@Override
 	public Optional<Reservation> get(Long id) {
-		return reservationRepo.findById(id);
+		return reservationRepo.getFullReservation(id);
 	}
 }
