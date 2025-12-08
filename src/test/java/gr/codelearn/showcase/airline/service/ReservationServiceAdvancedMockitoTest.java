@@ -69,13 +69,13 @@ class ReservationServiceAdvancedMockitoTest {
 
 		ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
 
-		service.reserve(1L, "john@doe.com", SeatClass.BUSINESS, "1A");
+		service.reserve(1L, "john@doe.com", SeatClass.ECONOMY, "1A");
 
 		verify(reservationRepo).save(captor.capture());
 		Reservation captured = captor.getValue();
 
 		assertEquals("1A", captured.getSeatNumber());
-		assertEquals(SeatClass.BUSINESS, captured.getSeatClass());
+		assertEquals(SeatClass.ECONOMY, captured.getSeatClass());
 		assertEquals(BookingStatus.PENDING, captured.getStatus());
 		assertEquals("john@doe.com", captured.getCustomer().getEmail());
 	}

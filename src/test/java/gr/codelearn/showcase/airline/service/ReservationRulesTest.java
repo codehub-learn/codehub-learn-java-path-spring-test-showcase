@@ -98,11 +98,11 @@ class ReservationRulesTest {
 
 		var service = new ReservationServiceImpl(flightRepo, customerRepo, reservationRepo, fixedClock);
 
-		service.reserve(flight.getId(), "first@user.com", SeatClass.BUSINESS, "1A");
+		service.reserve(flight.getId(), "first@user.com", SeatClass.ECONOMY, "1A");
 		service.confirm(flight.getId());
 
 		assertThrows(BusinessException.class, () ->
-				service.reserve(flight.getId(), "second@user.com", SeatClass.BUSINESS, "1B"));
+				service.reserve(flight.getId(), "second@user.com", SeatClass.ECONOMY, "1B"));
 	}
 
 	@Test
@@ -189,7 +189,7 @@ class ReservationRulesTest {
 
 		var service = new ReservationServiceImpl(flightRepo, customerRepo, reservationRepo, fixedClock);
 
-		var r = service.reserve(flight.getId(), "lifecycle@user.com", SeatClass.BUSINESS, "5A");
+		var r = service.reserve(flight.getId(), "lifecycle@user.com", SeatClass.ECONOMY, "5A");
 		assertEquals(BookingStatus.PENDING, r.getStatus());
 
 		service.confirm(r.getId());

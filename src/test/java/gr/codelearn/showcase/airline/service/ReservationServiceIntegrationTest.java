@@ -90,7 +90,7 @@ class ReservationServiceIntegrationTest {
 		reservationService.reserve(flight.getId(), customer.getEmail(), SeatClass.ECONOMY, "10B");
 
 		// Act + Assert
-		assertThrows(IllegalStateException.class,
+		assertThrows(BusinessException.class,
 					 () -> reservationService.reserve(flight.getId(), customer.getEmail(), SeatClass.ECONOMY, "10B"));
 	}
 
@@ -111,12 +111,12 @@ class ReservationServiceIntegrationTest {
 	@Test
 	void confirmFailsIfAlreadyConfirmed() {
 		// Arrange
-		Reservation r = reservationService.reserve(flight.getId(), customer.getEmail(), SeatClass.BUSINESS, "1A");
+		Reservation r = reservationService.reserve(flight.getId(), customer.getEmail(), SeatClass.ECONOMY, "1A");
 		assertEquals(BookingStatus.PENDING, r.getStatus());
 		reservationService.confirm(r.getId());
 
 		// Act + Assert
-		assertThrows(IllegalStateException.class, () -> reservationService.confirm(r.getId()));
+		assertThrows(BusinessException.class, () -> reservationService.confirm(r.getId()));
 	}
 
 	@Test

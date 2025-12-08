@@ -55,7 +55,12 @@ public class ReservationServiceImpl implements ReservationService {
 		res.setCustomer(customer);
 		res.setSeatClass(seatClass);
 		res.setSeatNumber(seatNumber);
-		res.setStatus(BookingStatus.PENDING);
+		if (seatClass == SeatClass.BUSINESS) {
+			res.setStatus(BookingStatus.CONFIRMED);
+		} else {
+			res.setStatus(BookingStatus.PENDING);
+		}
+
 		res.setCreatedAt(ZonedDateTime.now(clock));
 
 		return reservationRepo.save(res);
@@ -67,6 +72,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 		if (r.getStatus() == BookingStatus.CANCELLED) {
 			throw new BusinessException("Cannot confirm a cancelled reservation.");
+		}
+		if (r.getStatus() == BookingStatus.CONFIRMED) {
+			throw new BusinessException("Cannot confirm a confirmed reservation.");
 		}
 
 		r.setStatus(BookingStatus.CONFIRMED);

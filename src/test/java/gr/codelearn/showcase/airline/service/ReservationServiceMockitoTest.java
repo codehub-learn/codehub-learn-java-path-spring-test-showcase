@@ -79,7 +79,7 @@ class ReservationServiceMockitoTest {
 			return r;
 		});
 
-		var res = service.reserve(1L, "john@doe.com", SeatClass.BUSINESS, "1A");
+		var res = service.reserve(1L, "john@doe.com", SeatClass.ECONOMY, "1A");
 
 		assertNotNull(res.getId());
 		assertEquals("1A", res.getSeatNumber());
